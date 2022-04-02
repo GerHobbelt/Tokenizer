@@ -1084,7 +1084,7 @@ TEST(TokenizerTest, TokenInterface) {
   EXPECT_EQ(tokenizer.detokenize(tokens), text);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
   assert(argc == 2);
   data_dir = argv[1];
