@@ -70,7 +70,6 @@ setup(
     long_description=_get_long_description(),
     long_description_content_type="text/markdown",
     author="OpenNMT",
-    author_email="guillaume.klein@systrangroup.com",
     url="https://opennmt.net",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -95,7 +94,7 @@ setup(
     keywords="tokenization opennmt unicode bpe sentencepiece subword",
     packages=find_packages(),
     package_data=package_data,
-    python_requires=">=3.6,<3.12",
+    python_requires=">=3.6",
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
     ext_modules=[tokenizer_module],
