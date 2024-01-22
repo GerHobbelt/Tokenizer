@@ -13,3 +13,6 @@
 [submodule "third_party/mecab_cmake"]
 	path = third_party/mecab_cmake
 	url = https://github.com/jungikim/mecab_cmake.git
+[submodule "third_party/mecab-ko_cmake"]
+	path = third_party/mecab-ko_cmake
+	url = https://github.com/jungikim/mecab-ko_cmake.git
