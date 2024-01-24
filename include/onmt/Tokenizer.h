@@ -8,6 +8,10 @@
 #include "onmt/ITokenizer.h"
 #include "onmt/Token.h"
 
+#include "cppjieba/Jieba.hpp"
+#include "mecab.h"
+#include "mecab-ko.h"
+
 namespace onmt
 {
 
@@ -24,6 +28,9 @@ namespace onmt
       Aggressive,
       Char,
       Space,
+      Chinese,
+      Japanese,
+      Korean,
       None
     };
 
@@ -53,6 +60,9 @@ namespace onmt
       bool segment_numbers = false;
       bool segment_alphabet_change = false;
       std::vector<std::string> segment_alphabet;
+      std::string zh_dic;
+      std::string ja_dic;
+      std::string ko_dic;
 
       Options() = default;
       Options(Mode mode, int legacy_flags, const std::string& joiner = joiner_marker);
@@ -124,12 +134,16 @@ namespace onmt
   private:
     Options _options;
     std::shared_ptr<const SubwordEncoder> _subword_encoder;
+    std::shared_ptr<const cppjieba::Jieba> _jieba_tokenizer;
+    std::shared_ptr<const MeCab::Model> _mecab_tokenizer;
+    std::shared_ptr<const MeCabKo::Model> _mecab_ko_tokenizer;
 
     void tokenize_on_placeholders(const std::string& text,
                                   std::vector<Token>& annotated_tokens) const;
     void tokenize_text(const std::string& text,
                        std::vector<Token>& annotated_tokens,
-                       std::unordered_map<std::string, size_t>* alphabets) const;
+                       std::unordered_map<std::string, size_t>* alphabets,
+                       std::string* tokenized_text) const;
 
     void tokenize(const std::string& text,
                   std::vector<Token>& annotated_tokens,
@@ -152,6 +166,22 @@ namespace onmt
                       const std::vector<std::vector<std::string>>& features,
                       std::vector<Token>& tokens,
                       std::vector<size_t>* index_map = nullptr) const;
+
+    bool create_chinese_tokenizer();
+    bool create_japanese_tokenizer();
+    bool create_korean_tokenizer();
+
+    void tokenize_chinese(const std::string& text,
+                          std::vector<Token>& annotated_tokens,
+                          std::unordered_map<std::string, size_t>* alphabets) const;
+
+    void tokenize_japanese(const std::string& text,
+                           std::vector<Token>& annotated_tokens,
+                           std::unordered_map<std::string, size_t>* alphabets) const;
+
+    void tokenize_korean(const std::string& text,
+                         std::vector<Token>& annotated_tokens,
+                         std::unordered_map<std::string, size_t>* alphabets) const;
 
   public:
     // The symbols below are deprecated but kept for backward compatibility.

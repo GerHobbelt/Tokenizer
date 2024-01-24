@@ -46,6 +46,12 @@ namespace onmt
       return Mode::Space;
     if (mode == "char")
       return Mode::Char;
+    if (mode == "chinese")
+      return Mode::Chinese;
+    if (mode == "japanese")
+      return Mode::Japanese;
+    if (mode == "korean")
+      return Mode::Korean;
     throw std::invalid_argument("invalid tokenization mode: " + mode);
   }
 
@@ -63,6 +69,12 @@ namespace onmt
       return "none";
     case Mode::Space:
       return "space";
+    case Mode::Chinese:
+      return "chinese";
+    case Mode::Japanese:
+      return "japanese";
+    case Mode::Korean:
+      return "korean";
     }
     throw std::invalid_argument("invalid tokenization mode");
   }
@@ -161,6 +173,9 @@ namespace onmt
   {
     _options.validate();
     set_subword_encoder(subword_encoder);
+    create_chinese_tokenizer();
+    create_japanese_tokenizer();
+    create_korean_tokenizer();
   }
 
   Tokenizer::Tokenizer(Mode mode,
@@ -185,6 +200,9 @@ namespace onmt
 
       set_subword_encoder(std::shared_ptr<const SubwordEncoder>(subword_encoder));
     }
+    create_chinese_tokenizer();
+    create_japanese_tokenizer();
+    create_korean_tokenizer();
   }
 
   Tokenizer::Tokenizer(Mode mode,
@@ -195,6 +213,9 @@ namespace onmt
   {
     _options.validate();
     set_subword_encoder(std::shared_ptr<const SubwordEncoder>(subword_encoder));
+    create_chinese_tokenizer();
+    create_japanese_tokenizer();
+    create_korean_tokenizer();
   }
 
   Tokenizer::Tokenizer(const std::string& sp_model_path,
@@ -207,6 +228,9 @@ namespace onmt
   {
     _options.validate();
     set_subword_encoder(std::make_shared<const SentencePiece>(sp_model_path, sp_nbest_size, sp_alpha));
+    create_chinese_tokenizer();
+    create_japanese_tokenizer();
+    create_korean_tokenizer();
   }
 
   std::string Tokenizer::detokenize(const std::vector<std::string>& words,
@@ -515,8 +539,17 @@ namespace onmt
     case Mode::Space:
       tokenize_on_placeholders(text, annotated_tokens);
       break;
+    case Mode::Chinese:
+      tokenize_chinese(text, annotated_tokens, alphabets);
+      break;
+    case Mode::Japanese:
+      tokenize_japanese(text, annotated_tokens, alphabets);
+      break;
+    case Mode::Korean:
+      tokenize_korean(text, annotated_tokens, alphabets);
+      break;
     default:
-      tokenize_text(text, annotated_tokens, alphabets);
+      tokenize_text(text, annotated_tokens, alphabets, nullptr);
       break;
     }
 
@@ -782,7 +815,8 @@ namespace onmt
 
   void Tokenizer::tokenize_text(const std::string& text,
                                 std::vector<Token>& annotated_tokens,
-                                std::unordered_map<std::string, size_t>* alphabets) const
+                                std::unordered_map<std::string, size_t>* alphabets,
+                                std::string* tokenized_text) const
   {
     // TODO: this method has grown big and is hard to follow. It should be refactored into
     // smaller pieces to clarify its logic.
@@ -802,6 +836,13 @@ namespace onmt
       }
     }
 
+    std::vector<bool> char_has_space_before;
+    if (tokenized_text) {
+      char_has_space_before = unicode::get_character_has_space_before_info(text, *tokenized_text);
+      if(chars.size() != char_has_space_before.size())
+        throw std::runtime_error("tokenize_text(): chars.size() != char_has_space_before.size()");
+    }
+
     TokensBuilder builder(_options, annotated_tokens);
     State state = State::Space;
     int prev_alphabet = -1;
@@ -816,6 +857,8 @@ namespace onmt
       const size_t next_index = get_next_main_char(chars, scripts, i, _options);
       const auto* next_c = next_index < chars.size() ? &chars[next_index] : nullptr;
       const bool has_combining_marks = (next_index != i + 1);
+      const bool char_needs_space_before = tokenized_text ? char_has_space_before[i] : false;
+                 // if true, there was a space before the current character in the tokenized text
 
       if (state == State::Placeholder)
       {
@@ -950,14 +993,22 @@ namespace onmt
                                                   && _options.segment_alphabet_change))
                    || (prev_alphabet == placeholder_alphabet)
                    || (_options.segment_case
-                       && (segment_case = (new_casing == Casing::Mixed))))))
+                       && (segment_case = (new_casing == Casing::Mixed)))))
+              || (state == State::Letter && char_needs_space_before))
           {
             builder.current().join_right = true;
             if (_options.preserve_segmented_tokens
-                && (segment_case || segment_alphabet || segment_alphabet_change))
+                && (segment_case || segment_alphabet || segment_alphabet_change || char_needs_space_before))
               builder.current().preserve = true;
             builder.segment();
             builder.current().casing = update_casing(builder.current().casing, c.case_type, 0);
+
+            // in case of inserting spaces that were in the tokenized text,
+            // we want to add the joiner to the left of the subsequent tokens
+            if (char_needs_space_before){
+              builder.previous().join_right = false;
+              builder.current().join_left = true;
+            }
           }
           else
           {
@@ -1135,6 +1186,43 @@ namespace onmt
       _subword_encoder->update_tokenization_options(_options);
   }
 
+  bool Tokenizer::create_chinese_tokenizer()
+  {
+    if(_options.mode == Mode::Chinese)
+    {
+      std::string DICT_PATH = _options.zh_dic + "/jieba.dict.utf8";
+      std::string HMM_PATH = _options.zh_dic + "/hmm_model.utf8";
+      std::string USER_DICT_PATH = _options.zh_dic + "/user.dict.utf8";
+      std::string IDF_PATH = _options.zh_dic + "/idf.utf8";
+      std::string STOP_WORD_PATH = _options.zh_dic + "/stop_words.utf8";
+      cppjieba::Jieba* jiebaTokenizer = nullptr;
+      jiebaTokenizer = new cppjieba::Jieba(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_PATH);
+      _jieba_tokenizer = std::shared_ptr<const cppjieba::Jieba>(jiebaTokenizer);
+    }
+  }
+
+  bool Tokenizer::create_japanese_tokenizer()
+  {
+    if(_options.mode == Mode::Japanese)
+    {
+      std::string OPTION = "-r /dev/null -Owakati -d " + _options.ja_dic;
+      MeCab::Model* mecabTokenizer = nullptr;
+      mecabTokenizer = MeCab::createModel(OPTION.c_str());
+      _mecab_tokenizer = std::shared_ptr<const MeCab::Model>(mecabTokenizer);
+    }
+  }
+
+  bool Tokenizer::create_korean_tokenizer()
+  {
+    if(_options.mode == Mode::Korean)
+    {
+      std::string OPTION = "-r /dev/null -Owakati -d " + _options.ko_dic;
+      MeCabKo::Model* mecabKoTokenizer = nullptr;
+      mecabKoTokenizer = MeCabKo::createModel(OPTION.c_str());
+      _mecab_ko_tokenizer = std::shared_ptr<const MeCabKo::Model>(mecabKoTokenizer);
+    }
+  }
+
   bool Tokenizer::add_alphabet_to_segment(const std::string& alphabet)
   {
     return _options.add_alphabet_to_segment(alphabet);
@@ -1143,6 +1231,44 @@ namespace onmt
   bool Tokenizer::is_placeholder(const std::string& str)
   {
     return ::onmt::is_placeholder(str);
+  }
+
+  void Tokenizer::tokenize_chinese(const std::string& text,
+                                   std::vector<Token>& annotated_tokens,
+                                   std::unordered_map<std::string, size_t>* alphabets) const
+  {
+    std::vector<std::string> words;
+    _jieba_tokenizer->Cut(text, words, /*hmm=*/true);
+    std::string tokenized_text = limonp::Join(words.begin(), words.end(), " ");
+    tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
+  }
+
+  void Tokenizer::tokenize_japanese(const std::string& text,
+                                    std::vector<Token>& annotated_tokens,
+                                    std::unordered_map<std::string, size_t>* alphabets) const
+  {
+    MeCab::Tagger *tagger = _mecab_tokenizer->createTagger();
+    MeCab::Lattice *lattice = _mecab_tokenizer->createLattice();
+    lattice->set_sentence(text.c_str());
+    tagger->parse(lattice);
+    std::string tokenized_text = lattice->toString();
+    delete lattice;
+    delete tagger;
+    tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
+  }
+
+  void Tokenizer::tokenize_korean(const std::string& text,
+                                  std::vector<Token>& annotated_tokens,
+                                  std::unordered_map<std::string, size_t>* alphabets) const
+  {
+    MeCabKo::Tagger *tagger = _mecab_ko_tokenizer->createTagger();
+    MeCabKo::Lattice *lattice = _mecab_ko_tokenizer->createLattice();
+    lattice->set_sentence(text.c_str());
+    tagger->parse(lattice);
+    std::string tokenized_text = lattice->toString();
+    delete lattice;
+    delete tagger;
+    tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
   }
 
 }

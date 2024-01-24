@@ -19,6 +19,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_BUILD_TYPE)
 
+set(DISABLE_CPPJIEBA_TESTS TRUE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/cppjieba)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/mecab_cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/mecab-ko_cmake)
+
+
 option(SPM_ENABLE_SHARED "" OFF)
 option(SPM_ENABLE_TCMALLOC "" OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/sentencepiece EXCLUDE_FROM_ALL)
@@ -60,6 +66,10 @@ set(INCLUDE_DIRECTORIES
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${PROJECT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cppjieba/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cppjieba/deps/limonp/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mecab_cmake/mecab/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mecab-ko_cmake/src
 
   PRIVATE
   ${ICU_INCLUDE_DIRS}
@@ -100,6 +110,8 @@ list(APPEND LINK_LIBRARIES
   ${ICU_LIBRARIES}
   sentencepiece-static
   sentencepiece_train-static
+  mecab
+  mecab-ko
   )
 
 if(COMMAND create_library)

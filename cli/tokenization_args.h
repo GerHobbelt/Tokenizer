@@ -58,6 +58,15 @@ inline void add_tokenization_options(cxxopts::Options& options)
     ("soft_case_regions", "Allow case invariant tokens to be included in case regions",
      cxxopts::value<bool>()->default_value("false"))
     ;
+
+  options.add_options("CJK tokenization")
+    ("zh_dic", "path to the Jieba Chinese tokenizer dictionary resource",
+     cxxopts::value<std::string>()->default_value("/usr/local/share/cppjieba/dict"))
+    ("ja_dic", "path to the Mecab Japabese tokenizer dictionary resource",
+     cxxopts::value<std::string>()->default_value("/usr/local/lib/mecab/dic/unidic_lite"))
+    ("ko_dic", "path to the MecabKo Korean tokenizer dictionary resource",
+     cxxopts::value<std::string>()->default_value("/usr/local/lib/mecab-ko/dic/mecab-ko-dic"))
+    ;
 }
 
 inline onmt::Tokenizer::Options build_tokenization_options(const cxxopts::ParseResult& args)
@@ -85,5 +94,8 @@ inline onmt::Tokenizer::Options build_tokenization_options(const cxxopts::ParseR
   options.segment_alphabet = args["segment_alphabet"].as<std::vector<std::string>>();
   if (options.segment_alphabet.size() == 1 && options.segment_alphabet[0].empty())
     options.segment_alphabet.clear();
+  options.zh_dic = args["zh_dic"].as<std::string>();
+  options.ja_dic = args["ja_dic"].as<std::string>();
+  options.ko_dic = args["ko_dic"].as<std::string>();
   return options;
 }
