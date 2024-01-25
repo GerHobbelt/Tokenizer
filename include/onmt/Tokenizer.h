@@ -167,9 +167,9 @@ namespace onmt
                       std::vector<Token>& tokens,
                       std::vector<size_t>* index_map = nullptr) const;
 
-    bool create_chinese_tokenizer();
-    bool create_japanese_tokenizer();
-    bool create_korean_tokenizer();
+    void create_chinese_tokenizer();
+    void create_japanese_tokenizer();
+    void create_korean_tokenizer();
 
     void tokenize_chinese(const std::string& text,
                           std::vector<Token>& annotated_tokens,

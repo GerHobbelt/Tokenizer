@@ -60,12 +60,12 @@ inline void add_tokenization_options(cxxopts::Options& options)
     ;
 
   options.add_options("CJK tokenization")
-    ("zh_dic", "path to the Jieba Chinese tokenizer dictionary resource",
-     cxxopts::value<std::string>()->default_value("/usr/local/share/cppjieba/dict"))
-    ("ja_dic", "path to the Mecab Japabese tokenizer dictionary resource",
-     cxxopts::value<std::string>()->default_value("/usr/local/lib/mecab/dic/unidic_lite"))
-    ("ko_dic", "path to the MecabKo Korean tokenizer dictionary resource",
-     cxxopts::value<std::string>()->default_value("/usr/local/lib/mecab-ko/dic/mecab-ko-dic"))
+    ("zh_dic", "path to the Jieba Chinese tokenizer dictionary resource (e.g. /usr/local/share/cppjieba/dict)",
+     cxxopts::value<std::string>()->default_value(""))
+    ("ja_dic", "path to the Mecab Japabese tokenizer dictionary resource (e.g. /usr/local/lib/mecab/dic/unidic_lite)",
+     cxxopts::value<std::string>()->default_value(""))
+    ("ko_dic", "path to the MecabKo Korean tokenizer dictionary resource (e.g. /usr/local/lib/mecab-ko/dic/mecab-ko-dic)",
+     cxxopts::value<std::string>()->default_value(""))
     ;
 }
 

@@ -1,5 +1,7 @@
 #include "onmt/Tokenizer.h"
 
+#include <sys/stat.h>
+
 #include "onmt/BPE.h"
 #include "onmt/SentencePiece.h"
 #include "onmt/unicode/Unicode.h"
@@ -108,6 +110,9 @@ namespace onmt
     preserve_placeholders = flags & Flags::PreservePlaceholders;
     preserve_segmented_tokens = flags & Flags::PreserveSegmentedTokens;
     support_prior_joiners = flags & Flags::SupportPriorJoiners;
+    zh_dic = "";
+    ja_dic = "";
+    ko_dic = "";
 
     if ((flags & Flags::CacheBPEModel) | (flags & Flags::CacheModel))
       throw std::invalid_argument("Subword model caching is deprecated and should be handled in the client side");
@@ -146,6 +151,28 @@ namespace onmt
     {
       if (!add_alphabet_to_segment(alphabet))
         throw std::invalid_argument("invalid Unicode script in segment_alphabet list: " + alphabet);
+    }
+
+   if (mode == Tokenizer::Mode::Chinese){
+      struct stat sb;
+      if (stat(zh_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+        throw std::invalid_argument("zh_dic does not exist or is not a directory: " + zh_dic);
+      }
+      lang = "zh";
+    }
+    else if (mode == Tokenizer::Mode::Japanese){
+      struct stat sb;
+      if (stat(ja_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+        throw std::invalid_argument("ja_dic does not exist or is not a directory: " + ja_dic);
+      }
+      lang = "ja";
+    }
+    else if (mode == Tokenizer::Mode::Korean){
+      struct stat sb;
+      if (stat(ko_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+        throw std::invalid_argument("ko_dic does not exist or is not a directory: " + ko_dic);
+      }
+      lang = "ko";
     }
 
     if (!lang.empty())
@@ -1186,7 +1213,7 @@ namespace onmt
       _subword_encoder->update_tokenization_options(_options);
   }
 
-  bool Tokenizer::create_chinese_tokenizer()
+  void Tokenizer::create_chinese_tokenizer()
   {
     if(_options.mode == Mode::Chinese)
     {
@@ -1196,29 +1223,47 @@ namespace onmt
       std::string IDF_PATH = _options.zh_dic + "/idf.utf8";
       std::string STOP_WORD_PATH = _options.zh_dic + "/stop_words.utf8";
       cppjieba::Jieba* jiebaTokenizer = nullptr;
-      jiebaTokenizer = new cppjieba::Jieba(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_PATH);
+      try{
+        jiebaTokenizer = new cppjieba::Jieba(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_PATH);
+      }
+      catch (std::exception& e){
+        std::cerr << e.what() << std::endl
+                  << "Failed to create jieba model with zh_dic: " << _options.zh_dic << std::endl;
+      }
       _jieba_tokenizer = std::shared_ptr<const cppjieba::Jieba>(jiebaTokenizer);
     }
   }
 
-  bool Tokenizer::create_japanese_tokenizer()
+  void Tokenizer::create_japanese_tokenizer()
   {
     if(_options.mode == Mode::Japanese)
     {
       std::string OPTION = "-r /dev/null -Owakati -d " + _options.ja_dic;
       MeCab::Model* mecabTokenizer = nullptr;
-      mecabTokenizer = MeCab::createModel(OPTION.c_str());
+      try{
+        mecabTokenizer = MeCab::createModel(OPTION.c_str());
+      }
+      catch (std::exception& e){
+        std::cerr << e.what() << std::endl
+                  << "Failed to create Mecab model with ja_dic: " << _options.ja_dic << std::endl;
+      }
       _mecab_tokenizer = std::shared_ptr<const MeCab::Model>(mecabTokenizer);
     }
   }
 
-  bool Tokenizer::create_korean_tokenizer()
+  void Tokenizer::create_korean_tokenizer()
   {
     if(_options.mode == Mode::Korean)
     {
       std::string OPTION = "-r /dev/null -Owakati -d " + _options.ko_dic;
       MeCabKo::Model* mecabKoTokenizer = nullptr;
-      mecabKoTokenizer = MeCabKo::createModel(OPTION.c_str());
+      try{
+        mecabKoTokenizer = MeCabKo::createModel(OPTION.c_str());
+      }
+      catch (std::exception& e){
+        std::cerr << e.what() << std::endl
+                  << "Failed to create MecabKo model with ko_dic: " << _options.ko_dic << std::endl;
+      }
       _mecab_ko_tokenizer = std::shared_ptr<const MeCabKo::Model>(mecabKoTokenizer);
     }
   }
@@ -1238,7 +1283,15 @@ namespace onmt
                                    std::unordered_map<std::string, size_t>* alphabets) const
   {
     std::vector<std::string> words;
-    _jieba_tokenizer->Cut(text, words, /*hmm=*/true);
+    try{
+      _jieba_tokenizer->Cut(text, words, /*hmm=*/true);
+    }
+    catch (std::exception& e){
+      std::cerr << e.what() << std::endl
+                << "Failed to tokenize with jieba:" << std::endl
+                << "  zh_dic: " << _options.zh_dic << std::endl
+                << "  input: \"" << text << "\"" << std::endl;
+    }
     std::string tokenized_text = limonp::Join(words.begin(), words.end(), " ");
     tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
   }
@@ -1247,13 +1300,22 @@ namespace onmt
                                     std::vector<Token>& annotated_tokens,
                                     std::unordered_map<std::string, size_t>* alphabets) const
   {
-    MeCab::Tagger *tagger = _mecab_tokenizer->createTagger();
-    MeCab::Lattice *lattice = _mecab_tokenizer->createLattice();
-    lattice->set_sentence(text.c_str());
-    tagger->parse(lattice);
-    std::string tokenized_text = lattice->toString();
-    delete lattice;
-    delete tagger;
+    std::string tokenized_text;
+    try{
+      MeCab::Tagger *tagger = _mecab_tokenizer->createTagger();
+      MeCab::Lattice *lattice = _mecab_tokenizer->createLattice();
+      lattice->set_sentence(text.c_str());
+      tagger->parse(lattice);
+      tokenized_text = lattice->toString();
+      delete lattice;
+      delete tagger;
+    }
+    catch (std::exception& e){
+      std::cerr << e.what() << std::endl
+                << "Failed to tokenize with Mecab:" << std::endl
+                << "  ja_dic: " << _options.ja_dic << std::endl
+                << "  input: \"" << text << "\"" << std::endl;
+    }
     tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
   }
 
@@ -1261,13 +1323,22 @@ namespace onmt
                                   std::vector<Token>& annotated_tokens,
                                   std::unordered_map<std::string, size_t>* alphabets) const
   {
-    MeCabKo::Tagger *tagger = _mecab_ko_tokenizer->createTagger();
-    MeCabKo::Lattice *lattice = _mecab_ko_tokenizer->createLattice();
-    lattice->set_sentence(text.c_str());
-    tagger->parse(lattice);
-    std::string tokenized_text = lattice->toString();
-    delete lattice;
-    delete tagger;
+    std::string tokenized_text;
+    try{
+      MeCabKo::Tagger *tagger = _mecab_ko_tokenizer->createTagger();
+      MeCabKo::Lattice *lattice = _mecab_ko_tokenizer->createLattice();
+      lattice->set_sentence(text.c_str());
+      tagger->parse(lattice);
+      tokenized_text = lattice->toString();
+      delete lattice;
+      delete tagger;
+    }
+    catch (std::exception& e){
+      std::cerr << e.what() << std::endl
+                << "Failed to tokenize with MecabKo:" << std::endl
+                << "  ko_dic: " << _options.ko_dic << std::endl
+                << "  input: \"" << text << "\"" << std::endl;
+    }
     tokenize_text(text, annotated_tokens, alphabets, &tokenized_text);
   }
 

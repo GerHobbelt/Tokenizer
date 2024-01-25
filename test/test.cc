@@ -1112,7 +1112,7 @@ TEST(TokenizerTest, CJK_ZH_1) {
   options.no_substitution = true;
   options.segment_alphabet_change = true;
   options.support_prior_joiners = true;
-  options.zh_dic = "/usr/local/share/cppjieba/dict";
+  options.zh_dic = "../install/share/cppjieba/dict";
   Tokenizer tokenizer(options);
   test_tok(tokenizer,
     "对比发明1是1999年发行的《Drugs of the Future》第24卷、第｟ph｠项、第1173~1177版中登载的有关恩替卡韦的内容,其主要内容与第1款相同。",
@@ -1130,7 +1130,7 @@ TEST(TokenizerTest, CJK_JA_1) {
   options.no_substitution = true;
   options.segment_alphabet_change = true;
   options.support_prior_joiners = true;
-  options.ja_dic = "/usr/local/lib/mecab/dic/unidic_lite";
+  options.ja_dic = "../install/lib/mecab/dic/unidic_lite";
   Tokenizer tokenizer(options);
   test_tok(tokenizer,
     "ロベルト・｟アレクサンダー・シューマン｠（Robert Alexander Schumann, 1810年6月8日 - 1856年7月29日）は、ドイツ・ロマン派を代表する作曲家。"
@@ -1148,7 +1148,7 @@ TEST(TokenizerTest, CJK_KO_1) {
   options.no_substitution = true;
   options.segment_alphabet_change = true;
   options.support_prior_joiners = true;
-  options.ko_dic = "/usr/local/lib/mecab-ko/dic/mecab-ko-dic";
+  options.ko_dic = "../install/lib/mecab-ko/dic/mecab-ko-dic";
   Tokenizer tokenizer(options);
   test_tok(tokenizer,
     "삼성전자도 이에 맞서 지난해 4분기부터 HBM3(4세대) ｟공급을｠ 확대하며 관련 매출이 본격적으로 실적에 반영되기 시작한 가운데, 추격의 속도를 높이고 있다.",
