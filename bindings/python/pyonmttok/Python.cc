@@ -54,6 +54,9 @@ public:
                    bool segment_numbers,
                    bool segment_alphabet_change,
                    bool support_prior_joiners,
+                   const std::optional<std::string>& zh_dic,
+                   const std::optional<std::string>& ja_dic,
+                   const std::optional<std::string>& ko_dic,
                    const std::optional<std::vector<std::string>>& segment_alphabet)
   {
     std::shared_ptr<onmt::SubwordEncoder> subword_encoder;
@@ -85,6 +88,9 @@ public:
     options.segment_case = segment_case;
     options.segment_numbers = segment_numbers;
     options.segment_alphabet_change = segment_alphabet_change;
+    options.zh_dic = zh_dic.value_or("");
+    options.ja_dic = ja_dic.value_or("");
+    options.ko_dic = ko_dic.value_or("");
     if (segment_alphabet)
       options.segment_alphabet = segment_alphabet.value();
 
@@ -126,7 +132,10 @@ public:
       "segment_case"_a=options.segment_case,
       "segment_numbers"_a=options.segment_numbers,
       "segment_alphabet_change"_a=options.segment_alphabet_change,
-      "segment_alphabet"_a=options.segment_alphabet
+      "segment_alphabet"_a=options.segment_alphabet,
+      "zh_dic"_a=options.zh_dic,
+      "ja_dic"_a=options.ja_dic,
+      "ko_dic"_a=options.ko_dic
       );
   }
 
@@ -598,6 +607,9 @@ PYBIND11_MODULE(_ext, m)
          bool,
          bool,
          bool,
+         const std::optional<std::string>&,
+         const std::optional<std::string>&,
+         const std::optional<std::string>&,
          const std::optional<std::vector<std::string>>&>(),
          py::arg("mode"),
          py::kw_only(),
@@ -629,6 +641,9 @@ PYBIND11_MODULE(_ext, m)
          py::arg("segment_numbers")=false,
          py::arg("segment_alphabet_change")=false,
          py::arg("support_prior_joiners")=false,
+         py::arg("zh_dic")=py::none(),
+         py::arg("ja_dic")=py::none(),
+         py::arg("ko_dic")=py::none(),
          py::arg("segment_alphabet")=py::none())
     .def(py::init<const TokenizerWrapper&>(), py::arg("tokenizer"))
 
