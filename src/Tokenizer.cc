@@ -155,21 +155,21 @@ namespace onmt
 
    if (mode == Tokenizer::Mode::Chinese){
       struct stat sb;
-      if (stat(zh_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+      if (stat(zh_dic.c_str(), &sb) != 0 || !(sb.st_mode & S_IFDIR)) {
         throw std::invalid_argument("zh_dic does not exist or is not a directory: " + zh_dic);
       }
       lang = "zh";
     }
     else if (mode == Tokenizer::Mode::Japanese){
       struct stat sb;
-      if (stat(ja_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+      if (stat(ja_dic.c_str(), &sb) != 0 || !(sb.st_mode & S_IFDIR)) {
         throw std::invalid_argument("ja_dic does not exist or is not a directory: " + ja_dic);
       }
       lang = "ja";
     }
     else if (mode == Tokenizer::Mode::Korean){
       struct stat sb;
-      if (stat(ko_dic.c_str(), &sb) != 0 && !(sb.st_mode & S_IFDIR)) {
+      if (stat(ko_dic.c_str(), &sb) != 0 || !(sb.st_mode & S_IFDIR)) {
         throw std::invalid_argument("ko_dic does not exist or is not a directory: " + ko_dic);
       }
       lang = "ko";
@@ -1222,6 +1222,19 @@ namespace onmt
       std::string USER_DICT_PATH = _options.zh_dic + "/user.dict.utf8";
       std::string IDF_PATH = _options.zh_dic + "/idf.utf8";
       std::string STOP_WORD_PATH = _options.zh_dic + "/stop_words.utf8";
+
+      struct stat sb;
+      if (stat(DICT_PATH.c_str(), &sb) != 0 || !(sb.st_mode & S_IFREG))
+        throw std::invalid_argument("DICT_PATH does not exist or is not a file: " + DICT_PATH);
+      if (stat(HMM_PATH.c_str(), &sb) != 0 || !(sb.st_mode & S_IFREG))
+        throw std::invalid_argument("HMM_PATH does not exist or is not a file: " + HMM_PATH);
+      if (stat(USER_DICT_PATH.c_str(), &sb) != 0 || !(sb.st_mode & S_IFREG))
+        throw std::invalid_argument("USER_DICT_PATH does not exist or is not a file: " + USER_DICT_PATH);
+      if (stat(IDF_PATH.c_str(), &sb) != 0 || !(sb.st_mode & S_IFREG))
+        throw std::invalid_argument("IDF_PATH does not exist or is not a file: " + IDF_PATH);
+      if (stat(STOP_WORD_PATH.c_str(), &sb) != 0 || !(sb.st_mode & S_IFREG))
+        throw std::invalid_argument("STOP_WORD_PATH does not exist or is not a file: " + STOP_WORD_PATH);
+
       cppjieba::Jieba* jiebaTokenizer = nullptr;
       try{
         jiebaTokenizer = new cppjieba::Jieba(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_PATH);
