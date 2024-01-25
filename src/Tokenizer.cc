@@ -867,7 +867,7 @@ namespace onmt
     if (tokenized_text) {
       char_has_space_before = unicode::get_character_has_space_before_info(text, *tokenized_text);
       if(chars.size() != char_has_space_before.size())
-        throw std::runtime_error("tokenize_text(): chars.size() != char_has_space_before.size()");
+        throw std::runtime_error("tokenize_text(): chars.size() != char_has_space_before.size(): \""+text+"\"");
     }
 
     TokensBuilder builder(_options, annotated_tokens);

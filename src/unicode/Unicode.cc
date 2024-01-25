@@ -247,6 +247,19 @@ namespace onmt
         code_point_t t_code_point = utf8_to_cp(t_c_str, &t_char_size);
 
         bool has_space_before = false;
+
+        // Multiple separators in the original text may be normalized into one separator in the tokenized text.
+        // In this case, we advance the pointer on the original text until a non-separator char is met.
+        if (get_char_type(u_charType(code_point)) == CharType::Separator &&
+            get_char_type(u_charType(t_code_point)) != CharType::Separator) {
+          while (get_char_type(u_charType(code_point)) == CharType::Separator){
+            c_str += char_size;
+            char_size = 0;
+            code_point = utf8_to_cp(c_str, &char_size);
+            callback(false);
+          }
+        }
+        // A separator that was not in the original text is inserted in the tokenized text.
         if (get_char_type(u_charType(code_point)) != CharType::Separator) {
           while (get_char_type(u_charType(t_code_point)) == CharType::Separator) {
             t_c_str += t_char_size;
