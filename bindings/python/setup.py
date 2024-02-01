@@ -43,9 +43,9 @@ def _maybe_add_dic_resources():
     jiebadic_src = os.environ.get("CPPJIEBA_DIC")
     mecabdic_src = os.environ.get("MECAB_DIC")
     mecabkodic_src = os.environ.get("MECABKO_DIC")
-    print(f"CPPJIEBA_DIC: {jiebadic_src}")
-    print(f"MECAB_DIC: {mecabdic_src}")
-    print(f"MECABKO_DIC: {mecabkodic_src}")
+    # print(f"CPPJIEBA_DIC: {jiebadic_src}")
+    # print(f"MECAB_DIC: {mecabdic_src}")
+    # print(f"MECABKO_DIC: {mecabkodic_src}")
     base_dir = os.path.dirname(os.path.abspath(__file__))
     jiebadic_tgt = os.path.join(base_dir, "pyonmttok", "cppjieba_dic")
     mecabdic_tgt = os.path.join(base_dir, "pyonmttok", "mecab_dic")
@@ -71,7 +71,7 @@ def _maybe_add_dic_resources():
             pass
         package_data["pyonmttok.mecabko_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
 
-    print(f"{package_data = }")
+    # print(f"{package_data = }")
 
 
 _maybe_add_library_root("TOKENIZER")
