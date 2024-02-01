@@ -45,11 +45,15 @@ def _maybe_add_dic_resources(lib_name):
 
     jiebadic_src = os.path.join(root, os.sep.join(["share", "cppjieba", "dict"]))
     for lib_subdir in ("lib64", "lib"):
-        mecabdic_src = os.path.join(root, os.sep.join([lib_subdir, "mecab", "dic", "unidic_lite"]))
+        mecabdic_src = os.path.join(
+            root, os.sep.join([lib_subdir, "mecab", "dic", "unidic_lite"])
+        )
         if os.path.isdir(mecabdic_src):
             break
     for lib_subdir in ("lib64", "lib"):
-        mecabkodic_src = os.path.join(root, os.sep.join([lib_subdir, "mecab-ko", "dic", "mecab-ko-dic"]))
+        mecabkodic_src = os.path.join(
+            root, os.sep.join([lib_subdir, "mecab-ko", "dic", "mecab-ko-dic"])
+        )
         if os.path.isdir(mecabkodic_src):
             break
 
