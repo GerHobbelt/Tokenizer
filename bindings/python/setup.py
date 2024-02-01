@@ -66,8 +66,13 @@ def _maybe_add_dic_resources(lib_name):
     mecabdic_tgt = os.path.join(base_dir, "pyonmttok", "mecab_dic")
     mecabkodic_tgt = os.path.join(base_dir, "pyonmttok", "mecabko_dic")
 
+    def _del_dir(dirpath):
+        if os.path.exists(dirpath) and os.path.isdir(dirpath):
+            shutil.rmtree(dirpath)
+
     if jiebadic_src is not None:
-        shutil.copytree(jiebadic_src, jiebadic_tgt, dirs_exist_ok=True)
+        _del_dir(jiebadic_tgt)
+        shutil.copytree(jiebadic_src, jiebadic_tgt)
         with open(os.path.join(jiebadic_tgt, "__init__.py"), "w") as _:
             pass
         with open(os.path.join(jiebadic_tgt, "pos_dict", "__init__.py"), "w") as _:
@@ -76,12 +81,14 @@ def _maybe_add_dic_resources(lib_name):
         package_data["pyonmttok.cppjieba_dic.pos_dict"] = ["*.utf8"]
 
     if mecabdic_src is not None:
-        shutil.copytree(mecabdic_src, mecabdic_tgt, dirs_exist_ok=True)
+        _del_dir(mecabdic_tgt)
+        shutil.copytree(mecabdic_src, mecabdic_tgt)
         with open(os.path.join(mecabdic_tgt, "__init__.py"), "w") as _:
             pass
         package_data["pyonmttok.mecab_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
     if mecabkodic_src is not None:
-        shutil.copytree(mecabkodic_src, mecabkodic_tgt, dirs_exist_ok=True)
+        _del_dir(mecabkodic_tgt)
+        shutil.copytree(mecabkodic_src, mecabkodic_tgt)
         with open(os.path.join(mecabkodic_tgt, "__init__.py"), "w") as _:
             pass
         package_data["pyonmttok.mecabko_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
