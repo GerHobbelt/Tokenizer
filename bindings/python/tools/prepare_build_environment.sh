@@ -43,6 +43,6 @@ pip install "cmake==3.18.*"
 rm -rf build
 mkdir build
 cd build
-cmake -DLIB_ONLY=ON -DICU_ROOT=$ICU_ROOT $CMAKE_EXTRA_ARGS -DCMAKE_INSTALL_PREFIX=$ROOT_DIR/install ..
+cmake -DLIB_ONLY=ON -DICU_ROOT=$ICU_ROOT $CMAKE_EXTRA_ARGS -DCMAKE_INSTALL_PREFIX=$TOKENIZER_ROOT ..
 VERBOSE=1 make install
 cd $ROOT_DIR
