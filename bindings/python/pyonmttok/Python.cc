@@ -68,6 +68,17 @@ public:
     else if (bpe_model_path)
       subword_encoder = std::make_shared<onmt::BPE>(bpe_model_path.value(), bpe_dropout);
 
+    //TODO: pkg_resources is deprecated. Utilize importlib.
+    py::object warnings = py::module_::import("warnings");
+    py::object filterwarnings = warnings.attr("filterwarnings");
+    py::object builtins = pybind11::module::import("builtins");
+    filterwarnings("ignore", "category"_a=builtins.attr("DeprecationWarning"));
+    py::object pkg_resources = py::module_::import("pkg_resources");
+    py::object resource_filename = pkg_resources.attr("resource_filename");
+    std::string default_zh_dic = py::str(resource_filename("pyonmttok", "cppjieba_dic"));
+    std::string default_ja_dic = py::str(resource_filename("pyonmttok", "mecab_dic"));
+    std::string default_ko_dic = py::str(resource_filename("pyonmttok", "mecabko_dic"));
+
     onmt::Tokenizer::Options options;
     options.mode = onmt::Tokenizer::str_to_mode(mode);
     options.lang = lang.value_or("");
@@ -88,9 +99,9 @@ public:
     options.segment_case = segment_case;
     options.segment_numbers = segment_numbers;
     options.segment_alphabet_change = segment_alphabet_change;
-    options.zh_dic = zh_dic.value_or("");
-    options.ja_dic = ja_dic.value_or("");
-    options.ko_dic = ko_dic.value_or("");
+    options.zh_dic = zh_dic.value_or(default_zh_dic);
+    options.ja_dic = ja_dic.value_or(default_ja_dic);
+    options.ko_dic = ko_dic.value_or(default_ko_dic);
     if (segment_alphabet)
       options.segment_alphabet = segment_alphabet.value();
 

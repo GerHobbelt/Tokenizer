@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 
 import pybind11
@@ -7,6 +8,7 @@ from setuptools import Extension, find_packages, setup
 
 include_dirs = [pybind11.get_include()]
 library_dirs = []
+package_data = {}
 
 
 def _get_long_description():
@@ -37,11 +39,46 @@ def _maybe_add_library_root(lib_name, header_only=False):
                 break
 
 
+def _maybe_add_dic_resources():
+    jiebadic_src = os.environ.get("CPPJIEBA_DIC")
+    mecabdic_src = os.environ.get("MECAB_DIC")
+    mecabkodic_src = os.environ.get("MECABKO_DIC")
+    print(f"CPPJIEBA_DIC: {jiebadic_src}")
+    print(f"MECAB_DIC: {mecabdic_src}")
+    print(f"MECABKO_DIC: {mecabkodic_src}")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    jiebadic_tgt = os.path.join(base_dir, "pyonmttok", "cppjieba_dic")
+    mecabdic_tgt = os.path.join(base_dir, "pyonmttok", "mecab_dic")
+    mecabkodic_tgt = os.path.join(base_dir, "pyonmttok", "mecabko_dic")
+
+    if jiebadic_src is not None:
+        shutil.copytree(jiebadic_src, jiebadic_tgt, dirs_exist_ok=True)
+        with open(os.path.join(jiebadic_tgt, "__init__.py"), "w") as _:
+            pass
+        with open(os.path.join(jiebadic_tgt, "pos_dict", "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.cppjieba_dic"] = ["*.utf8"]
+        package_data["pyonmttok.cppjieba_dic.pos_dict"] = ["*.utf8"]
+
+    if mecabdic_src is not None:
+        shutil.copytree(mecabdic_src, mecabdic_tgt, dirs_exist_ok=True)
+        with open(os.path.join(mecabdic_tgt, "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.mecab_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
+    if mecabkodic_src is not None:
+        shutil.copytree(mecabkodic_src, mecabkodic_tgt, dirs_exist_ok=True)
+        with open(os.path.join(mecabkodic_tgt, "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.mecabko_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
+
+    print(f"{package_data = }")
+
+
 _maybe_add_library_root("TOKENIZER")
+_maybe_add_dic_resources()
 
 cflags = ["-std=c++17", "-fvisibility=hidden"]
 ldflags = []
-package_data = {}
 if sys.platform == "darwin":
     cflags.append("-mmacosx-version-min=10.14")
     ldflags.append("-Wl,-rpath,/usr/local/lib")
