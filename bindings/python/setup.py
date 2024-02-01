@@ -40,13 +40,23 @@ def _maybe_add_library_root(lib_name, header_only=False):
     print("include_dirs: " + str(include_dirs))
 
 
-def _maybe_add_dic_resources():
-    jiebadic_src = os.environ.get("CPPJIEBA_DIC")
-    mecabdic_src = os.environ.get("MECAB_DIC")
-    mecabkodic_src = os.environ.get("MECABKO_DIC")
+def _maybe_add_dic_resources(lib_name):
+    root = os.environ.get("%s_ROOT" % lib_name)
+
+    jiebadic_src = os.path.join(root, os.sep.join(["share", "cppjieba", "dict"]))
+    for lib_subdir in ("lib64", "lib"):
+        mecabdic_src = os.path.join(root, os.sep.join([lib_subdir, "mecab", "dic", "unidic_lite"]))
+        if os.path.isdir(mecabdic_src):
+            break
+    for lib_subdir in ("lib64", "lib"):
+        mecabkodic_src = os.path.join(root, os.sep.join([lib_subdir, "mecab-ko", "dic", "mecab-ko-dic"]))
+        if os.path.isdir(mecabkodic_src):
+            break
+
     print("CPPJIEBA_DIC: " + str(jiebadic_src))
     print("MECAB_DIC: " + str(mecabdic_src))
     print("MECABKO_DIC: " + str(mecabkodic_src))
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     jiebadic_tgt = os.path.join(base_dir, "pyonmttok", "cppjieba_dic")
     mecabdic_tgt = os.path.join(base_dir, "pyonmttok", "mecab_dic")
@@ -76,7 +86,7 @@ def _maybe_add_dic_resources():
 
 
 _maybe_add_library_root("TOKENIZER")
-_maybe_add_dic_resources()
+_maybe_add_dic_resources("TOKENIZER")
 
 cflags = ["-std=c++17", "-fvisibility=hidden"]
 ldflags = []
