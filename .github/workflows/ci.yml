@@ -105,10 +105,8 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: TOKENIZER_ROOT='${{ github.workspace }}/install'          
           CIBW_ENVIRONMENT_MACOS: TOKENIZER_ROOT='${{ github.workspace }}/install'
           CIBW_ENVIRONMENT_WINDOWS: TOKENIZER_ROOT='${{ github.workspace }}\install'
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-    LD_LIBRARY_PATH=${TOKENIZER_ROOT}/lib:${TOKENIZER_ROOT}/lib64:${LD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-    DYLD_LIBRARY_PATH=${TOKENIZER_ROOT}/lib:${TOKENIZER_ROOT}/lib64:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: LD_LIBRARY_PATH=${TOKENIZER_ROOT}/lib:${TOKENIZER_ROOT}/lib64:${LD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: DYLD_LIBRARY_PATH=${TOKENIZER_ROOT}/lib:${TOKENIZER_ROOT}/lib64:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BEFORE_ALL: bindings/python/tools/prepare_build_environment.sh
           CIBW_BEFORE_ALL_WINDOWS: bash bindings/python/tools/prepare_build_environment_windows.sh
           CIBW_BEFORE_BUILD: pip install pybind11==2.10.1
