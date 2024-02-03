@@ -20,7 +20,7 @@ if [ "$CIBW_ARCHS" == "arm64" ]; then
     # Remove dynamic libraries to force static link.
     rm $ICU_ROOT/lib/*.dylib
 
-    CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
+    CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
 
 else
 
