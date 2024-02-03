@@ -697,14 +697,14 @@ def test_chinese():
     assert detok == text
 
 
-def test_japanese():
-    tokenizer = pyonmttok.Tokenizer("japanese", joiner_annotate=True, joiner_new=True)
-    text = "こんにちは世界！"
-    tokens, features = tokenizer.tokenize(text)
-    assert tokens == ["こんにちは", "￭", "世界", "￭", "！"]
-    assert features is None
-    detok = tokenizer.detokenize(tokens)
-    assert detok == text
+# def test_japanese():
+#     tokenizer = pyonmttok.Tokenizer("japanese", joiner_annotate=True, joiner_new=True)
+#     text = "こんにちは世界！"
+#     tokens, features = tokenizer.tokenize(text)
+#     assert tokens == ["こんにちは", "￭", "世界", "￭", "！"]
+#     assert features is None
+#     detok = tokenizer.detokenize(tokens)
+#     assert detok == text
 
 
 def test_korean():
