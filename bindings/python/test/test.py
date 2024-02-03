@@ -685,3 +685,33 @@ def test_vocab_pickle():
     assert vocab_clone.ids_to_tokens == ["z", "a", "b", "c"]
     assert vocab_clone.default_id == 0
     assert vocab_clone.counters == [_MAX_COUNTER, 3, 1, 2]
+
+
+def test_chinese():
+    tokenizer = pyonmttok.Tokenizer("chinese", joiner_annotate=True, joiner_new=True)
+    text = "你好世界！"
+    tokens, features = tokenizer.tokenize(text)
+    assert tokens == ["你好", "￭", "世界", "￭", "！"]
+    assert features is None
+    detok = tokenizer.detokenize(tokens)
+    assert detok == text
+
+
+def test_japanese():
+    tokenizer = pyonmttok.Tokenizer("japanese", joiner_annotate=True, joiner_new=True)
+    text = "こんにちは世界！"
+    tokens, features = tokenizer.tokenize(text)
+    assert tokens == ["こんにちは", "￭", "世界", "￭", "！"]
+    assert features is None
+    detok = tokenizer.detokenize(tokens)
+    assert detok == text
+
+
+def test_korean():
+    tokenizer = pyonmttok.Tokenizer("korean", joiner_annotate=True, joiner_new=True)
+    text = "안녕, 세상아!"
+    tokens, features = tokenizer.tokenize(text)
+    assert tokens == ["안녕", "￭", ",", "세상아", "￭", "!"]
+    assert features is None
+    detok = tokenizer.detokenize(tokens)
+    assert detok == text
