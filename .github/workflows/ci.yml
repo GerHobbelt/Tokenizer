@@ -84,11 +84,8 @@ jobs:
         include:
         - os: ubuntu-20.04
           arch: aarch64
-        exclude:
         - os: macos-11
           arch: arm64
-      # arm64 binary cross-compiled on x86 needs to, but cannot, run on x86 host machine
-      # disabling macos arm64 configuration for now
 
     steps:
       - uses: actions/checkout@v3
