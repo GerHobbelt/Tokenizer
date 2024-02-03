@@ -19,4 +19,4 @@ cmake --build . --config Release --target install
 
 cp $ROOT_DIR/icu/bin64/icudt*.dll $ROOT_DIR/bindings/python/pyonmttok/
 cp $ROOT_DIR/icu/bin64/icuuc*.dll $ROOT_DIR/bindings/python/pyonmttok/
-cp $TOKENIZER_ROOT/install/bin/OpenNMTTokenizer.dll $ROOT_DIR/bindings/python/pyonmttok/
+cp $TOKENIZER_ROOT/bin/OpenNMTTokenizer.dll $ROOT_DIR/bindings/python/pyonmttok/
