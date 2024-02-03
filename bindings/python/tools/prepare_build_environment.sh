@@ -20,7 +20,7 @@ if [ "$CIBW_ARCHS" == "arm64" ]; then
     # Remove dynamic libraries to force static link.
     rm $ICU_ROOT/lib/*.dylib
 
-    CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
+    CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
 
 else
 
@@ -37,7 +37,7 @@ fi
 cd $ROOT_DIR
 
 # Install cmake.
-pip install "cmake==3.18.*"
+pip install "cmake==3.28.1"
 
 # Build Tokenizer.
 rm -rf build
