@@ -233,6 +233,67 @@ namespace onmt
       return chars;
     }
 
+    template <typename Callback>
+    static inline void character_has_space_before_iterator(const std::string& str,
+                                                           const std::string& tokenized,
+                                                           const Callback& callback)
+    {
+      const char* c_str = str.c_str();
+      const char* t_c_str = tokenized.c_str();
+      while (*c_str && *t_c_str)
+      {
+        size_t char_size = 0;
+        size_t t_char_size = 0;
+        code_point_t code_point = utf8_to_cp(c_str, &char_size);
+        code_point_t t_code_point = utf8_to_cp(t_c_str, &t_char_size);
+
+        bool has_space_before = false;
+
+        // Multiple separators in the original text may be normalized into one separator in the tokenized text.
+        // In this case, we advance the pointer on the original text until a non-separator char is met.
+        if (get_char_type(u_charType(code_point)) == CharType::Separator &&
+            get_char_type(u_charType(t_code_point)) != CharType::Separator) {
+          while (get_char_type(u_charType(code_point)) == CharType::Separator){
+            c_str += char_size;
+            char_size = 0;
+            code_point = utf8_to_cp(c_str, &char_size);
+            callback(false);
+          }
+        }
+        // A separator that was not in the original text is inserted in the tokenized text.
+        if (get_char_type(u_charType(code_point)) != CharType::Separator) {
+          while (get_char_type(u_charType(t_code_point)) == CharType::Separator) {
+            t_c_str += t_char_size;
+            has_space_before = true;
+            t_char_size = 0;
+            t_code_point = utf8_to_cp(t_c_str, &t_char_size);
+          }
+        }
+        if (code_point == 0) { // Ignore invalid code points.
+          c_str++;
+          t_c_str++;
+          continue;
+        }
+        callback(has_space_before);
+        c_str += char_size;
+        t_c_str += t_char_size;
+      }
+    }
+
+    std::vector<bool> get_character_has_space_before_info(const std::string& str,
+                                                          const std::string& tokenized)
+    {
+      std::vector<bool> has_space_before;
+      has_space_before.reserve(str.size());
+      character_has_space_before_iterator(
+        str, tokenized,
+        [&has_space_before](bool char_has_space_before)
+        {
+          has_space_before.push_back(char_has_space_before);
+        });
+      return has_space_before;
+    }
+
     bool support_language_rules()
     {
       return U_ICU_VERSION_MAJOR_NUM >= 60;

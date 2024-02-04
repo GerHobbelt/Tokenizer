@@ -7,3 +7,12 @@
 [submodule "third_party/sentencepiece"]
 	path = third_party/sentencepiece
 	url = https://github.com/google/sentencepiece.git
+[submodule "third_party/cppjieba"]
+	path = third_party/cppjieba
+	url = https://github.com/jungikim/cppjieba.git
+[submodule "third_party/mecab_cmake"]
+	path = third_party/mecab_cmake
+	url = https://github.com/jungikim/mecab_cmake.git
+[submodule "third_party/mecab-ko_cmake"]
+	path = third_party/mecab-ko_cmake
+	url = https://github.com/jungikim/mecab-ko_cmake.git

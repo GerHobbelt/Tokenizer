@@ -1104,6 +1104,58 @@ TEST(TokenizerTest, TokenInterface) {
   EXPECT_EQ(tokenizer.detokenize(tokens), text);
 }
 
+TEST(TokenizerTest, CJK_ZH_1) {
+  Tokenizer::Options options;
+  options.mode = Tokenizer::Mode::Chinese;
+  options.spacer_annotate = true;
+  options.spacer_new = true;
+  options.no_substitution = true;
+  options.segment_alphabet_change = true;
+  options.support_prior_joiners = true;
+  options.zh_dic = "install/share/cppjieba/dict";
+  Tokenizer tokenizer(options);
+  test_tok(tokenizer,
+    "对比发明1是1999年发行的《Drugs of the Future》第24卷、第｟ph｠项、第1173~1177版中登载的有关恩替卡韦的内容,其主要内容与第1款相同。",
+    // jieba: 对比 发明 1 是 1999 年 发行 的 《 Drugs   of   the   Future 》 第 24 卷 、 第 ｟ ph ｠ 项 、 "
+    //        第 1173 ~ 1177 版中 登载 的 有关 恩替 卡韦 的 内容 , 其 主要 内容 与 第 1 款 相同 。
+    "对比 发明 1 是 1999 年 发行 的 《 Drugs ▁ of ▁ the ▁ Future 》 第 24 卷 、 第 ｟ph｠ 项 、 "
+    "第 1173 ~ 1177 版中 登载 的 有关 恩替 卡韦 的 内容 , 其 主要 内容 与 第 1 款 相同 。");
+}
+
+TEST(TokenizerTest, CJK_JA_1) {
+  Tokenizer::Options options;
+  options.mode = Tokenizer::Mode::Japanese;
+  options.spacer_annotate = true;
+  options.spacer_new = true;
+  options.no_substitution = true;
+  options.segment_alphabet_change = true;
+  options.support_prior_joiners = true;
+  options.ja_dic = "install/lib/mecab/dic/unidic_lite";
+  Tokenizer tokenizer(options);
+  test_tok(tokenizer,
+    "ロベルト・｟アレクサンダー・シューマン｠（Robert Alexander Schumann, 1810年6月8日 - 1856年7月29日）は、ドイツ・ロマン派を代表する作曲家。"
+    "ベートーヴェンやシューベルトの音楽のロマン的後>継者として位置づけられ、交響曲から合唱曲まで幅広い分野で作品を残した。とくにピアノ曲と歌曲に>おいて評価が高い。",
+    // mecab: ロベルト ・ ｟ アレクサンダー ・ シューマン ｠ （ Robert Alexander Schumann , 1810 年 6 月 8 日 - 1856 年 7 月 29 日 ） は 、 ドイツ ・ ロマン 派 を 代表 する 作曲 家 。
+    //        ベートーヴェン や シューベルト の 音楽 の ロマン 的 後 > 継 者 と し て 位置 づけ られ 、 交響 曲 から 合唱 曲 まで 幅広い 分野 で 作品 を 残し た 。 とくに ピアノ 曲 と 歌曲 に > おい て 評価 が 高い 。
+    "ロベルト ・ ｟アレクサンダー・シューマン｠ （ Robert ▁ Alexander ▁ Schumann , ▁ 1810 年 6 月 8 日 ▁ - ▁ 1856 年 7 月 29 日 ） は 、 ドイツ ・ ロマン 派 を 代表 する 作曲 家 。 "
+    "ベートーヴェン や シューベルト の 音楽 の ロマン 的 後 > 継 者 と し て 位置 づけ られ 、 交響 曲 から 合唱 曲 まで 幅広 い 分野 で 作品 を 残 し た 。 とくに ピアノ 曲 と 歌曲 に > おい て 評価 が 高 い 。");
+}
+
+TEST(TokenizerTest, CJK_KO_1) {
+  Tokenizer::Options options;
+  options.mode = Tokenizer::Mode::Korean;
+  options.joiner_annotate = true;
+  options.no_substitution = true;
+  options.segment_alphabet_change = true;
+  options.support_prior_joiners = true;
+  options.ko_dic = "install/lib/mecab-ko/dic/mecab-ko-dic";
+  Tokenizer tokenizer(options);
+  test_tok(tokenizer,
+    "삼성전자도 이에 맞서 지난해 4분기부터 HBM3(4세대) ｟공급을｠ 확대하며 관련 매출이 본격적으로 실적에 반영되기 시작한 가운데, 추격의 속도를 높이고 있다.",
+    // mecab_ko: 삼성전자 도 이 에 맞서 지난해 4 분기 부터 HBM 3 ( 4 세대 ) ｟ 공급 을 ｠ 확대 하 며 관련 매출 이 본격 적 으로 실적 에 반영 되 기 시작 한 가운데 , 추격 의 속도 를 높이 고 있 다 .
+    "삼성전자 ￭도 이 ￭에 맞서 지난해 4 ￭분기 ￭부터 HBM ￭3 ￭(￭ 4 ￭세대 ￭) ｟공급을｠ 확대 ￭하 ￭며 관련 매출 ￭이 본격 ￭적 ￭으로 실적 ￭에 반영 ￭되 ￭기 시작 ￭한 가운데 ￭, 추격 ￭의 속도 ￭를 높이 ￭고 있 ￭다 ￭.");
+}
+
 int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
   assert(argc == 2);

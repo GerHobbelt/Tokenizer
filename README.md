@@ -70,6 +70,11 @@ See the `-h` flag to list the available options.
 ### Dependencies
 
 * [ICU](http://site.icu-project.org/)
+* [modified version of cppjieba](https://github.com/jungikim/cppjieba) forked from [cppjieba](https://github.com/yanyiwu/cppjieba) (MIT license)
+* [modified version of Mecab](https://github.com/jungikim/mecab_cmake) forked from [Mecab](https://github.com/taku910/mecab) (GPL, LGPL, BSD license)
+* [modified version of MecabKo](https://github.com/jungikim/mecab_cmake) forked from [MecabKo](https://bitbucket.org/eunjeon/mecab-ko) (GPL, LGPL, BSD license)
+* [unidic-lite](https://pypi.org/project/unidic-lite) (BSD license)
+* [mecab-ko-dic](https://pypi.org/project/mecab-ko-dic) (Apache License 2.0)
 
 ### Compiling
 

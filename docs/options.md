@@ -33,6 +33,10 @@ Defines the tokenization mode:
 * `char`: character tokenization
 * `space`: space tokenization
 * `none`: no tokenization is applied and the input is passed directly to the BPE or SentencePiece model if set.
+* `chinese`: adds Chinese (cppjieba) tokenization on top of `aggressive` mode
+* `japanese`: adds Japanese (MeCab) tokenization on top of `aggressive` mode
+* `korean`: adds Korean (MeCabKo) tokenization on top of `aggressive` mode
+
 
 ```bash
 $ echo "It costs £2,000." | cli/tokenize --mode conservative
@@ -49,11 +53,21 @@ It costs £2,000.
 
 $ echo "It costs £2,000." | cli/tokenize --mode none
 It costs £2,000.
+
+$ echo "售价2,000英镑。" | cli/tokenize --mode chinese --zh_dic ${install_path}/share/cppjieba/dict
+售价 2 , 000 英镑 。
+
+$ echo "費用は£2,000です。" | cli/tokenize --mode japanese --ja_dic ${install_path}/lib/mecab/dic/unidic_lite
+費用 は £ 2 , 000 です 。
+
+$ echo "가격은 £2,000입니다." | cli/tokenize --mode korean --ko_dic ${install_path}/lib/mecab-ko/dic/mecab-ko-dic
+가격 은 £ 2 , 000 입니다 .
 ```
 
 **Notes:**
 
 * `space` and `none` modes are incompatible with options listed in the [Segmentation](#segmentation) section.
+* `chinese`, `japanese` and `korean` modes extend `aggressive` mode with language-specific tokenizations.
 * In all modes, the text is at least segmented on placeholders:
 
 ```bash
