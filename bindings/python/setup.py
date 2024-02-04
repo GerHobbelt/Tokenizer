@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 
 import pybind11
@@ -7,6 +8,7 @@ from setuptools import Extension, find_packages, setup
 
 include_dirs = [pybind11.get_include()]
 library_dirs = []
+package_data = {}
 
 
 def _get_long_description():
@@ -35,13 +37,70 @@ def _maybe_add_library_root(lib_name, header_only=False):
             if os.path.isdir(lib_dir):
                 library_dirs.append(lib_dir)
                 break
+    print("include_dirs: " + str(include_dirs))
+
+
+def _maybe_add_dic_resources(lib_name):
+    root = os.environ.get("%s_ROOT" % lib_name)
+
+    jiebadic_src = os.path.join(root, os.sep.join(["share", "cppjieba", "dict"]))
+    for lib_subdir in ("lib64", "lib"):
+        mecabdic_src = os.path.join(
+            root, os.sep.join([lib_subdir, "mecab", "dic", "unidic_lite"])
+        )
+        if os.path.isdir(mecabdic_src):
+            break
+    for lib_subdir in ("lib64", "lib"):
+        mecabkodic_src = os.path.join(
+            root, os.sep.join([lib_subdir, "mecab-ko", "dic", "mecab-ko-dic"])
+        )
+        if os.path.isdir(mecabkodic_src):
+            break
+
+    print("CPPJIEBA_DIC: " + str(jiebadic_src))
+    print("MECAB_DIC: " + str(mecabdic_src))
+    print("MECABKO_DIC: " + str(mecabkodic_src))
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    jiebadic_tgt = os.path.join(base_dir, "pyonmttok", "cppjieba_dic")
+    mecabdic_tgt = os.path.join(base_dir, "pyonmttok", "mecab_dic")
+    mecabkodic_tgt = os.path.join(base_dir, "pyonmttok", "mecabko_dic")
+
+    def _del_dir(dirpath):
+        if os.path.exists(dirpath) and os.path.isdir(dirpath):
+            shutil.rmtree(dirpath)
+
+    if jiebadic_src is not None:
+        _del_dir(jiebadic_tgt)
+        shutil.copytree(jiebadic_src, jiebadic_tgt)
+        with open(os.path.join(jiebadic_tgt, "__init__.py"), "w") as _:
+            pass
+        with open(os.path.join(jiebadic_tgt, "pos_dict", "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.cppjieba_dic"] = ["*.utf8"]
+        package_data["pyonmttok.cppjieba_dic.pos_dict"] = ["*.utf8"]
+
+    if mecabdic_src is not None:
+        _del_dir(mecabdic_tgt)
+        shutil.copytree(mecabdic_src, mecabdic_tgt)
+        with open(os.path.join(mecabdic_tgt, "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.mecab_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
+    if mecabkodic_src is not None:
+        _del_dir(mecabkodic_tgt)
+        shutil.copytree(mecabkodic_src, mecabkodic_tgt)
+        with open(os.path.join(mecabkodic_tgt, "__init__.py"), "w") as _:
+            pass
+        package_data["pyonmttok.mecabko_dic"] = ["*.bin", "*.def", "*.dic", "dicrc"]
+
+    print("package_data: " + str(package_data))
 
 
 _maybe_add_library_root("TOKENIZER")
+_maybe_add_dic_resources("TOKENIZER")
 
 cflags = ["-std=c++17", "-fvisibility=hidden"]
 ldflags = []
-package_data = {}
 if sys.platform == "darwin":
     cflags.append("-mmacosx-version-min=10.14")
     ldflags.append("-Wl,-rpath,/usr/local/lib")

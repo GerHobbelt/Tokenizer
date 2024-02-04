@@ -83,6 +83,8 @@ namespace onmt
     };
 
     OPENNMTTOKENIZER_EXPORT std::vector<CharInfo> get_characters_info(const std::string& str);
+    OPENNMTTOKENIZER_EXPORT std::vector<bool> get_character_has_space_before_info(const std::string& str,
+                                                                                  const std::string& tokenized);
 
 
     // The symbols below are deprecated but kept for backward compatibility.

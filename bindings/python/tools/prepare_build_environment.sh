@@ -37,12 +37,12 @@ fi
 cd $ROOT_DIR
 
 # Install cmake.
-pip install "cmake==3.18.*"
+pip install "cmake==3.28.1"
 
 # Build Tokenizer.
 rm -rf build
 mkdir build
 cd build
-cmake -DLIB_ONLY=ON -DICU_ROOT=$ICU_ROOT $CMAKE_EXTRA_ARGS ..
-VERBOSE=1 make -j2 install
+cmake -DLIB_ONLY=ON -DICU_ROOT=$ICU_ROOT $CMAKE_EXTRA_ARGS -DCMAKE_INSTALL_PREFIX=$TOKENIZER_ROOT ..
+VERBOSE=1 make install
 cd $ROOT_DIR

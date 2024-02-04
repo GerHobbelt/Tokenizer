@@ -24,7 +24,7 @@ The project follows [semantic versioning 2.0.0](https://semver.org/). The API co
 
 ### New features
 
-### Fixes and improvements
+* Chinese, Japanese, Korean (CJK) tokenization mode
 
 ## [v1.37.1](https://github.com/OpenNMT/Tokenizer/releases/tag/v1.37.1) (2023-03-01)
 
