@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
+#include <unicode/utf8.h>
 #include <unicode/locid.h>
 #include <unicode/uchar.h>
 #include <unicode/uscript.h>
