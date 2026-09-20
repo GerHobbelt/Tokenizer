@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.5.0)
 
+# Allow find_package() to use <PackageName>_ROOT variables (ICU_ROOT)
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 # Set policy for setting the MSVC runtime library for static MSVC builds
 if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
@@ -121,6 +126,12 @@ else()
 endif()
 
 include(GNUInstallDirs)
+
+# Ensure install include dir is defined on all platforms
+if(NOT CMAKE_INSTALL_INCLUDEDIR)
+  set(CMAKE_INSTALL_INCLUDEDIR include)
+endif()
+
 include(GenerateExportHeader)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/onmt/${PROJECT_NAME_LOWER}_export.h)
